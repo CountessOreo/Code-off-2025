@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Maze Volume Slider • 🦎</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Background music -->
+  <audio id="bgm" preload="auto" loop>
+    <source src="Lizard%20DJ.mp3" type="audio/mpeg" />
+  </audio>
+
+  <div class="container">
+    <div class="panel">
+      <h2>🦎 Gecko Maze</h2>
+      <canvas id="mazeCanvas"></canvas>
+      <p id="mazeHint">Use arrows/WASD. Your gecko’s horizontal progress sets the volume.</p>
+
+      <!-- Guide bar -->
+      <div id="guideBar">
+        <div id="guideIcon" aria-hidden="true"></div>
+        <div>
+          <div id="guideText"><strong>Step 1:</strong> Move the gecko with <kbd>WASD</kbd> or arrow keys.</div>
+          <div id="guideSub">Reach the shiny fly to choose the volume you want.</div>
+        </div>
+      </div>
+
+      <p id="statusMsg"></p>
+      <button id="newMazeBtn" class="btn-primary">New Maze</button>
+    </div>
+
+    <div class="panel">
+      <h2>Volume Gauge</h2>
+      <div class="slider-track readonly" id="sliderTrack">
+        <div class="slider-fill" id="sliderFill"></div>
+        <div class="slider-thumb" id="sliderThumb"></div>
+      </div>
+      <p id="volumeLabel">Volume: 0%</p>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-backdrop" id="modal">
+    <div class="modal-window" id="modalWindow">
+      <div class="spinner" id="spinner"></div>
+      <h3 class="modal-title" id="modalTitle">Message</h3>
+      <div class="modal-message" id="modalMsg">…</div>
+      <div class="modal-actions" id="modalActions">
+        <button class="btn" id="modalNo">Cancel</button>
+        <button class="btn btn-primary runaway" id="modalYes">OK</button>
+      </div>
+    </div>
+  </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
