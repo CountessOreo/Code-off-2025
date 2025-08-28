@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="stylesheet" href="style.css" />
+<title>Error 404??</title>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <div id="sr" class="sr-only" aria-live="polite"></div>
+
+  <main id="main">
+    <div class="wrap">
+      <div class="card" id="card" tabindex="0" aria-describedby="subtitle">
+        <div class="glow"></div>
+        <h1 id="title">Error <span class="errorNumber">404</span></h1>
+        <p class="subtitle" id="subtitle">The thing you wanted did not survive re-entry.</p>
+
+        <div class="row">
+          <button class="primary guard" id="detailsBtn" aria-describedby="hintDetails">See details</button>
+          <button class="guard" id="homeBtn" aria-describedby="hintHome">Go “Home”</button>
+          <button class="muted guard" id="backBtn" aria-describedby="hintBack">Back</button>
+        </div>
+
+        <!-- Small inline hints (visually subtle; strong for screen readers) -->
+        <div class="hints">
+          <span id="hintDetails" class="hint">Opens details, sometimes a captcha appears.</span>
+          <span id="hintHome" class="hint">Totally goes home. (It doesn’t.)</span>
+          <span id="hintBack" class="hint">Back, but somehow forward.</span>
+        </div>
+
+        <div class="foot">
+          Tip: D = details, H = home, B = back, ? = tour, M = mute, R = reset. Press <span class="tiny">Esc</span> to… try exiting something.
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Captcha modal -->
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="capTitle">
+    <div class="box">
+      <div class="cap-head">
+        <h3 id="capTitle" style="margin:0">🔐 Prove you’re not lost</h3>
+        <div class="try"><span id="triesLeft">10</span> attempts remain</div>
+      </div>
+      <p style="margin:.25rem 0 .5rem">Select <strong>all squares with traffic lights</strong> to unlock the page.</p>
+      <div class="grid" id="grid"></div>
+      <div class="cap-footer">
+        <div class="msg" id="capMsg">&nbsp;</div>
+        <div class="row">
+          <div class="progress"><div class="bar" id="bar"></div></div>
+          <button id="refreshBtn">↻ New Images</button>
+          <button class="primary" id="verifyBtn">Verify</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fake BSOD -->
+  <div class="blue" id="bsod" role="alertdialog" aria-live="assertive" aria-label="Fake system crash">
+    <div class="inner">
+      <h2>:( Your page ran into a problem and needs to restart.</h2>
+      <p>We’re just collecting some error info, and then we’ll restart for you.</p>
+      <p><span id="bsodPct">0</span>% complete</p>
+      <p class="tiny">ERROR_CODE: UX_DESIGNER_ENJOYMENT_DETECTED</p>
+      <p class="tiny">For more information, visit <span class="blink">https://totally-not-helpful.help</span></p>
+      <p class="tiny">Stop code: PAGE_NOT_FOUND_FROM_HELL</p>
+    </div>
+  </div>
+
+  <!-- Are you sure? modal -->
+  <div class="modal" id="sure" role="dialog" aria-modal="true" aria-labelledby="sureTitle">
+    <div class="box">
+      <h3 style="margin:0" id="sureTitle">Are you sure?</h3>
+      <div class="sure-body">
+        <div aria-hidden="true">🤔</div>
+        <div>
+          <div id="sureMsg">This action may take you somewhere… different.</div>
+          <div class="steps" id="sureSteps">Step 1/5</div>
+          <div class="btns">
+            <button id="sureNo">No</button>
+            <button class="primary" id="sureYes">Yes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Annoying excuse popup -->
+  <div class="modal" id="excuseBox" role="dialog" aria-modal="true" aria-labelledby="excuseTitle">
+    <div class="box">
+      <h3 id="excuseTitle">🙃 Oops!</h3>
+      <p id="excuseText"></p>
+      <div class="btns">
+        <button id="excuseOk" class="primary" autofocus>Fine...</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fake cursor -->
+  <div id="cursor" class="fake-cursor" aria-hidden="true">🪤</div>
+  <div id="bubble" class="bubble">SNAP!</div>
+
+  <!-- Guide panel (discoverability / progress) -->
+  <div id="guide" class="guide" aria-live="polite">
+    <button id="helpBtn" class="help" aria-label="Open tour">?</button>
+    <div class="guide-body">
+      <div class="guide-head">Explore the chaos</div>
+      <ul class="checklist">
+        <li><label><input id="chkFlip" type="checkbox" disabled> Flip the error card</label></li>
+        <li><label><input id="chkCaptcha" type="checkbox" disabled> Trigger the captcha</label></li>
+        <li><label><input id="chkSure" type="checkbox" disabled> Survive “Are you sure?”</label></li>
+        <li><label><input id="chkCursor" type="checkbox" disabled> Spring the mouse-trap</label></li>
+        <li><label><input id="chkBsod" type="checkbox" disabled> Witness the fake BSOD</label></li>
+      </ul>
+      <div id="nextHint" class="next-hint">Hint: Press <b>D</b> to begin.</div>
+      <div class="toggles">
+        <label><input id="muteTgl" type="checkbox"> Mute beeps</label>
+        <label><input id="calmTgl" type="checkbox"> Reduce motion</label>
+      </div>
+      <div class="guide-actions">
+        <button id="tourStart" class="primary small">Start tour</button>
+        <button id="tourReset" class="small">Reset progress</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Coach-mark tour -->
+  <div id="tour" class="coach" aria-hidden="true">
+    <div id="tourRing" class="ring" aria-hidden="true"></div>
+    <div id="tourCard" class="coach-card" role="dialog" aria-live="polite">
+      <div id="tourText">Let’s discover the “features”.</div>
+      <div class="btns">
+        <button id="tourSkip">Skip</button>
+        <button id="tourNext" class="primary">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
