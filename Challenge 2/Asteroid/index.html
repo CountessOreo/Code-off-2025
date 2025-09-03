@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<title>Asteroids ≤150</title>
+<canvas id="c" style="background:#000;position:fixed;inset:0"></canvas>
+<script>
+  const c = document.getElementById("c"), ctx = c.getContext("2d"), TAU = Math.PI * 2;
+  let W = 0, H = 0, t = 0, keys = {}, paused = false, gameOver = false, atMenu = true;
+  let score = 0, hi = +(localStorage.hi || 0), AC, audOK = false, lives = 3, inv = 0;
+  const rnd = n => Math.random() * n, sgn = () => (Math.random() < .5 ? -1 : 1), wrap = (x, m) => (x % m + m) % m;
+  const dist2 = (a, b) => { let dx = a.x - b.x, dy = a.y - b.y; return dx * dx + dy * dy };
+  
+  function resize() { c.width = W = innerWidth; c.height = H = innerHeight }
+  addEventListener("resize", resize); resize();
+  function makeShip() { return { x: W/2, y: H/2, dx: 0, dy: 0, a: -Math.PI/2, thrust: 0, cd: 0 } }
+  function makeRock(x = rnd(W), y = rnd(H), r = 40) {
+    const sp = .5 + rnd(1.2), pts = [...Array(8)].map(() => .7 + rnd(.3));
+    return { x, y, dx: sgn()*sp, dy: sgn()*sp, a: rnd(TAU), r, pts };
+  }
+  function makeBullet(s) {
+    const sp = 6, nx = Math.cos(s.a), ny = Math.sin(s.a);
+    return { x: s.x + nx*12, y: s.y + ny*12, dx: s.dx + nx*sp, dy: s.dy + ny*sp, t: 0 };
+  }
+  function startAudio(){ if(audOK) return; AC = new (window.AudioContext||webkitAudioContext)(); audOK = true }
+  function beep(f, d = .12, type = "square", v = .15){
+    if(!audOK) return;
+    const o = AC.createOscillator(), g = AC.createGain(), t0 = AC.currentTime;
+    o.type = type; o.frequency.value = f; g.gain.value = v; o.connect(g); g.connect(AC.destination);
+    o.start(t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + d); o.stop(t0 + d);
+  }
+  let ship, rocks, bul, fx = [], stars = [];
+  function reset(){
+    ship = makeShip();
+    rocks = [...Array(6)].map(() => makeRock());
+    bul = []; fx = [];
+    score = 0; gameOver = false; lives = 3; inv = 60;
+    stars = [...Array(80)].map(() => [rnd(W), rnd(H)]);
+  }
+  onkeydown = onkeyup = e => {
+    keys[e.key] = e.type == "keydown";
+    if (e.type == "keydown") {
+      startAudio();
+      if (atMenu && (e.key == "Enter" || e.key == " ")) atMenu = false;
+      if (!atMenu && (e.key == "p" || e.key == "P")) paused = !paused;
+      if (!atMenu && e.key == " " && !gameOver && ship?.cd <= 0 && bul.length < 4) {bul.push(makeBullet(ship)); ship.cd = 10;}
+    }
+  };
+  addEventListener("keydown", e => { if (gameOver && (e.key=="r"||e.key=="R")) reset() });
+  addEventListener("pointerdown", e => {
+    if(!atMenu) return; startAudio();
+    const r = c.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    const bw = 260, bh = 52, bx = W/2 - bw/2, by = H/2 + 44;
+    if (x > bx && x < bx + bw && y > by && y < by + bh) atMenu = false;
+  });
+  function drawShip(){
+    ctx.save(); ctx.translate(ship.x, ship.y); ctx.rotate(ship.a), ctx.strokeStyle = "#0f0"; ctx.beginPath();
+    ctx.moveTo(12,0); ctx.lineTo(-10,7); ctx.lineTo(-7,0); ctx.lineTo(-10,-7), ctx.closePath(); ctx.stroke();
+    if (ship.thrust && !gameOver) {ctx.beginPath(); ctx.moveTo(-10,4); ctx.lineTo(-18 + (t%4<2 ? -4 : 4), 0); ctx.lineTo(-10,-4); ctx.stroke();}
+    if (inv) { ctx.beginPath(); ctx.strokeStyle = "#6ff"; ctx.arc(0,0,16,0,TAU); ctx.stroke()}
+    ctx.restore();
+  }
+  function drawRock(r){
+    ctx.save(); ctx.translate(r.x, r.y); ctx.rotate(r.a), ctx.strokeStyle = "#fff"; ctx.beginPath();
+    const n = r.pts.length, base = r.r;
+    for (let i=0;i<n;i++){
+      const ang = i/n*TAU, rr = base*r.pts[i];
+      const px = Math.cos(ang)*rr, py = Math.sin(ang)*rr;
+      i ? ctx.lineTo(px,py) : ctx.moveTo(px,py);
+    }ctx.closePath(); ctx.stroke(); ctx.restore();
+  }
+  function popup(msg){
+    ctx.fillStyle="rgba(0,0,0,.7)";
+    const w=420,h=140,x=W/2-w/2,y=H/2-h/2;
+    ctx.fillRect(x,y,w,h); ctx.strokeStyle="#f55"; ctx.strokeRect(x+2,y+2,w-4,h-4);
+    ctx.fillStyle="#fff"; ctx.font="28px monospace"; ctx.fillText(msg, W/2-ctx.measureText(msg).width/2, H/2-10);
+    const sub="Press R to restart";
+    ctx.font="18px monospace"; ctx.fillText(sub, W/2-ctx.measureText(sub).width/2, H/2+28);
+  }
+  function menu(){
+    const w=560,h=290,x=W/2-w/2,y=H/2-h/2;
+    ctx.fillStyle="rgba(0,0,0,.7)"; ctx.fillRect(x,y,w,h); ctx.strokeStyle="#fff"; ctx.strokeRect(x+2,y+2,w-4,h-4);
+    ctx.fillStyle="#fff"; ctx.font="28px monospace";
+    const title="ASTEROIDS";
+    ctx.fillText(title, W/2-ctx.measureText(title).width/2, y+48); ctx.font="16px monospace";
+    const lines=[
+      "Shoot asteroids, avoid crashes. Lives: 3 (spawn shield).",
+      "Controls: ←/→ rotate  •  ↑ thrust  •  Space fire",
+      "Pause: P  •  Restart: R  •  Hi-Score saved",
+      "Start: Click START or press Enter/Space"
+    ];
+    lines.forEach((ln,i)=>ctx.fillText(ln, W/2-ctx.measureText(ln).width/2, y+86+i*20));
+    const bw=260,bh=52,bx=W/2-bw/2,by=H/2+44;
+    ctx.fillStyle="#0f0"; ctx.fillRect(bx,by,bw,bh); ctx.strokeStyle="#003300"; ctx.strokeRect(bx,by,bw,bh);
+    ctx.fillStyle="#000"; ctx.font="22px monospace";
+    const st="START GAME";
+    ctx.fillText(st, W/2-ctx.measureText(st).width/2, by+34);
+  }
+  function step(){
+    t++; ctx.clearRect(0,0,W,H);
+    if (atMenu){ menu(); requestAnimationFrame(step); return }
+    if (paused){ ctx.fillStyle="#888"; ctx.font="20px monospace"; ctx.fillText("PAUSED (P)",12,44); requestAnimationFrame(step); return }
+    ctx.fillStyle="#222";
+    for (let s of stars){ s[0]=(s[0]+.2)%W; ctx.fillRect(s[0],s[1],1,1) }
+    if (inv) inv--;
+    if (!gameOver){
+      ship.cd = Math.max(0, ship.cd-1);
+      if (keys.ArrowLeft)  ship.a -= .07;
+      if (keys.ArrowRight) ship.a += .07;
+      ship.thrust = keys.ArrowUp ? .8 : 0;
+      ship.dx += Math.cos(ship.a)*ship.thrust*.08; ship.dy += Math.sin(ship.a)*ship.thrust*.08;
+      ship.dx *= .995; ship.dy *= .995;
+      ship.x = wrap(ship.x + ship.dx, W); ship.y = wrap(ship.y + ship.dy, H);
+    }
+    bul = bul.filter(b => b.t < 90);
+    for (let b of bul){ b.t++; b.x = wrap(b.x+b.dx,W); b.y = wrap(b.y+b.dy,H) }
+    let next = [];
+    for (let r of rocks){
+      const i = bul.findIndex(b => dist2(b,r) < r.r*r.r);
+      if (i >= 0){
+        score += 10; bul.splice(i,1); beep(880,.07,"square",.2);
+        for (let k=16;k--;) fx.push({x:r.x,y:r.y,dx:sgn()*rnd(2),dy:sgn()*rnd(2),t:24});
+        if (r.r > 14){ const nr = r.r*.6; next.push(makeRock(r.x,r.y,nr), makeRock(r.x,r.y,nr)) }continue;}
+      next.push(r);
+    }rocks = next;
+    for (let r of rocks){ r.x = wrap(r.x+r.dx,W); r.y = wrap(r.y+r.dy,H); r.a += .002 }
+    if (!gameOver && inv<=0 && rocks.some(r => dist2(r,ship) < (r.r+8)*(r.r+8))){
+      beep(120,.25,"sawtooth",.25); setTimeout(()=>beep(90,.3,"sawtooth",.25),60);
+      for (let k=24;k--;) fx.push({x:ship.x,y:ship.y,dx:sgn()*rnd(3),dy:sgn()*rnd(3),t:28});
+      if (lives){ lives--; ship = makeShip(); inv = 120 }
+      else { gameOver = true; if (score > hi){ hi = score; localStorage.hi = hi } }
+    }
+    if (!gameOver && rocks.length === 0){
+      const n = 6 + Math.min(10, Math.floor(score/60));
+      rocks = [...Array(n)].map(() => makeRock(rnd(W), rnd(H), 30 + rnd(25)));
+    }
+    drawShip(); for (let r of rocks) drawRock(r);
+    ctx.fillStyle="#ff0"; for (let b of bul){ ctx.beginPath(); ctx.arc(b.x,b.y,2,0,TAU); ctx.fill() }
+    fx = fx.filter(p => p.t-- > 0); ctx.fillStyle="#f80";
+    for (let p of fx){ p.x+=p.dx; p.y+=p.dy; ctx.fillRect(p.x,p.y,2,2) }
+    ctx.fillStyle="#0f0"; ctx.font="16px monospace"; ctx.fillText("SCORE "+score+"  HI "+hi, 12, 22); ctx.strokeStyle="#0f0";
+    for (let i=0;i<lives;i++){
+      const x = W-18-16*i, y = 16;
+      ctx.beginPath(); ctx.moveTo(x+6,y); ctx.lineTo(x-6,y+10); ctx.lineTo(x+6,y+10), ctx.closePath(); ctx.stroke();
+    }
+    if (gameOver){popup("YOU LOSE"); if (keys.r || keys.R){ reset(); keys.r = keys.R = false}} 
+    requestAnimationFrame(step);
+  }
+  reset();
+  step();
+</script>
