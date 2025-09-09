@@ -3,21 +3,26 @@
 Two deliberately mischievous front‑end challenges. Both are pure HTML/CSS/JS (no build step), keyboard‑friendly, and designed to sharpen UX instincts by *doing the wrong thing… on purpose.*
 
 > **Challenges**
-> 1) **Worst UX/UI Design** — _Lizard Maze: The Most Annoyingly Delightful Volume Slider_  
+> ***Challenge 1 (Week 1- Worst UX/UI Design)***
+> 1) **Volume Slider** — _Lizard Maze: The Most Annoyingly Delightful Volume Slider_  
 > 2) **404 Page Challenge** — _“Explore the Chaos”_
+
+> ***Challenge 2 (Week 2 - Arcade Game Recreation)***
+> 1) **Pong** — _Recreation of the classic game Pong_  
+> 2) **Asteroid** — _“Explore the Chaos”_
 
 ---
 
 ## Table of Contents
 
 - [About](#about)
-- [Challenge 1 — Worst UX/UI Design](#challenge-1--worst-uxui-design)
+- [Challenge 1 — Volume Slider](#challenge-1--worst-uxui-design)
   - [What’s in this repo](#whats-in-this-repo)
   - [How it works](#how-it-works)
   - [Feature list](#feature-list)
   - [Controls](#controls)
   - [Run locally](#run-locally)
-- [Challenge 2 — 404 Page Challenge](#challenge-2--404-page-challenge)
+- [Challenge 1 — 404 Page Challenge](#challenge-2--404-page-challenge)
   - [Highlights](#highlights)
   - [Assistance](#assistance)
   - [Demo & Structure](#demo--structure)
@@ -28,7 +33,7 @@ Two deliberately mischievous front‑end challenges. Both are pure HTML/CSS/JS (
 
 ## About
 
-This repository contains two intentionally “hostile” UX challenges. Use them to practice:
+This repository contains the Code-Off-2025 challenges. They have helped me practice:
 - defensive design, progressive disclosure, and stateful UI flows;
 - accessibility under motion/chaos;
 - micro‑interactions, audio feedback, and persistent state;
@@ -36,7 +41,7 @@ This repository contains two intentionally “hostile” UX challenges. Use them
 
 ---
 
-## Challenge 1 — Worst UX/UI Design
+## Challenge 1 — Volume Slider
 
 ### **Lizard Maze — The Most Annoyingly Delightful Volume Slider**
 
@@ -117,7 +122,7 @@ Then visit: <http://localhost:8080>
 
 ---
 
-## Challenge 2 — 404 Page Challenge
+## Challenge 1 — 404 Page Challenge
 
 ### **“Explore the Chaos”**
 
@@ -195,3 +200,4 @@ Then visit: <http://localhost:8080>
 - Reach the **BSOD** by failing the captcha repeatedly.  
 
 ---
+
